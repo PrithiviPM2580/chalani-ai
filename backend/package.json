@@ -1,0 +1,31 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "ChalaniAI – a smart invoice management app using AI to simplify billing, tracking, and financial workflows.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PrithiviPM2580/chalani-ai.git"
+  },
+  "keywords": [
+    "invoice",
+    "billing",
+    "finance",
+    "accounting",
+    "ai",
+    "chalani",
+    "automation",
+    "payments",
+    "pdf",
+    "business"
+  ],
+  "author": "Prithivi PM",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PrithiviPM2580/chalani-ai/issues"
+  },
+  "homepage": "https://github.com/PrithiviPM2580/chalani-ai#readme"
+}
