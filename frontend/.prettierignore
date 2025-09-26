@@ -1,0 +1,27 @@
+# Ignore build output
+dist
+.vite
+
+# Dependencies
+node_modules
+
+# Logs
+*.log
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+
+# Lock files (optional, usually keep formatting disabled here)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Public assets (often big files, images, etc. don’t need formatting)
+public
+
+# Ignore coverage if you add testing later
+coverage
