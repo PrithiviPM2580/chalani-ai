@@ -1,1 +1,124 @@
 @import 'tailwindcss';
+
+:root {
+  --font-family-sans: 'Manjari', sans-serif;
+}
+
+@theme {
+  --color-primary-blue-50: #e9effd;
+  --color-primary-blue-100: #bbcff9;
+  --color-primary-blue-200: #9bb7f6;
+  --color-primary-blue-300: #6d96f2;
+  --color-primary-blue-400: #5182ef;
+  --color-primary-blue-500: #2563eb;
+  --color-primary-blue-600: #225ad6;
+  --color-primary-blue-700: #1a46a7;
+  --color-primary-blue-800: #143681;
+  --color-primary-blue-900: #102a63;
+
+  --color-secondary-green-50: #e9f9ef;
+  --color-secondary-green-100: #baedcd;
+  --color-secondary-green-200: #99e4b5;
+  --color-secondary-green-300: #6bd893;
+  --color-secondary-green-400: #4ed17e;
+  --color-secondary-green-500: #22c55e;
+  --color-secondary-green-600: #1fb356;
+  --color-secondary-green-700: #188c43;
+  --color-secondary-green-800: #136c34;
+  --color-secondary-green-900: #0e5327;
+
+  --color-accent-purple-50: #f4ebfd;
+  --color-accent-purple-100: #dec0f8;
+  --color-accent-purple-200: #cda1f5;
+  --color-accent-purple-300: #b776f1;
+  --color-accent-purple-400: #a95cee;
+  --color-accent-purple-500: #9333ea;
+  --color-accent-purple-600: #862ed5;
+  --color-accent-purple-700: #6824a6;
+  --color-accent-purple-800: #511c81;
+  --color-accent-purple-900: #3e1562;
+
+  --color-neutral-black-50: #e7e8e9;
+  --color-neutral-black-100: #c6c8cb;
+  --color-neutral-black-200: #999ca2;
+  --color-neutral-black-300: #696d77;
+  --color-neutral-black-400: #3c424e;
+  --color-neutral-black-500: #111827;
+  --color-neutral-black-600: #0e1421;
+  --color-neutral-black-700: #0c111c;
+  --color-neutral-black-800: #0a0e16;
+  --color-neutral-black-900: #080b12;
+
+  --text-primary-blue-50: #e9effd;
+  --text-primary-blue-100: #bbcff9;
+  --text-primary-blue-200: #9bb7f6;
+  --text-primary-blue-300: #6d96f2;
+  --text-primary-blue-400: #5182ef;
+  --text-primary-blue-500: #2563eb;
+  --text-primary-blue-600: #225ad6;
+  --text-primary-blue-700: #1a46a7;
+  --text-primary-blue-800: #143681;
+  --text-primary-blue-900: #102a63;
+
+  --text-secondary-green-50: #e9f9ef;
+  --text-secondary-green-100: #baedcd;
+  --text-secondary-green-200: #99e4b5;
+  --text-secondary-green-300: #6bd893;
+  --text-secondary-green-400: #4ed17e;
+  --text-secondary-green-500: #22c55e;
+  --text-secondary-green-600: #1fb356;
+  --text-secondary-green-700: #188c43;
+  --text-secondary-green-800: #136c34;
+  --text-secondary-green-900: #0e5327;
+
+  --text-accent-purple-50: #f4ebfd;
+  --text-accent-purple-100: #dec0f8;
+  --text-accent-purple-200: #cda1f5;
+  --text-accent-purple-300: #b776f1;
+  --text-accent-purple-400: #a95cee;
+  --text-accent-purple-500: #9333ea;
+  --text-accent-purple-600: #862ed5;
+  --text-accent-purple-700: #6824a6;
+  --text-accent-purple-800: #511c81;
+  --text-accent-purple-900: #3e1562;
+
+  --text-neutral-black-50: #e7e8e9;
+  --text-neutral-black-100: #c6c8cb;
+  --text-neutral-black-200: #999ca2;
+  --text-neutral-black-300: #696d77;
+  --text-neutral-black-400: #3c424e;
+  --text-neutral-black-500: #111827;
+  --text-neutral-black-600: #0e1421;
+  --text-neutral-black-700: #0c111c;
+  --text-neutral-black-800: #0a0e16;
+  --text-neutral-black-900: #080b12;
+
+  --text-mobile-h1: 32px;
+  --text-mobile-h2: 28px;
+  --text-mobile-h3: 24px;
+  --text-mobile-h4: 20px;
+  --text-mobile-h5: 18px;
+  --text-mobile-body-large: 16px;
+  --text-mobile-body-medium: 14px;
+  --text-mobile-body-small: 12px;
+  --text-mobile-p: 14px;
+
+  --text-desktop-h1: 48px;
+  --text-desktop-h2: 40px;
+  --text-desktop-h3: 32px;
+  --text-desktop-h4: 24px;
+  --text-desktop-h5: 20px;
+  --text-desktop-body-large: 18px;
+  --text-desktop-body-medium: 16px;
+  --text-desktop-body-small: 14px;
+  --text-desktop-p: 16px;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-family-sans);
+  }
+  body {
+    background-color: #fcfbfc;
+  }
+}
