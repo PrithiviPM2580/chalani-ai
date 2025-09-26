@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      #Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      #Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: ./frontend/package-lock.json
+
+      #Install dependencies
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./frontend
+
+      #Lint checks
+      - name: Run lint checks
+        run: npm run lint
+        working-directory: ./frontend
+
+      #Prettier checks
+      - name: Run prettier checks
+        run: npm run format:check
+        working-directory: ./frontend
+
+      #Type checks
+      - name: Typescript type checks
+        run: npm run type-check
+        working-directory: ./frontend
+
+      #Build the project
+      - name: Build the project
+        run: npm run build
+        working-directory: ./frontend
