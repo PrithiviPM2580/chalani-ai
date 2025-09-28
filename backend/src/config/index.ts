@@ -1,9 +1,3 @@
-/********************************************\
-*  ****************************************  *
-*  *  Configuration for the application   *  *
-*  ****************************************  *
-\********************************************/
-
 import { validate } from '@/lib/validate';
 import { envValidationSchema } from '@/validation';
 import dotenv from 'dotenv';
