@@ -31,6 +31,8 @@
   "homepage": "https://github.com/PrithiviPM2580/chalani-ai#readme",
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@types/compression": "^1.8.1",
+    "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
     "eslint": "^9.36.0",
@@ -45,8 +47,11 @@
     "typescript-eslint": "^8.44.1"
   },
   "dependencies": {
+    "compression": "^1.8.1",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.2",
     "express": "^5.1.0",
+    "helmet": "^8.1.0",
     "winston": "^3.17.0",
     "zod": "^4.1.11"
   }
