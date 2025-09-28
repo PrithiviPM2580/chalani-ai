@@ -1,5 +1,5 @@
 import winston from 'winston';
-import config from '@/config';
+import config from '@/config/envValidation';
 
 const { combine, timestamp, errors, json, printf, colorize } = winston.format;
 

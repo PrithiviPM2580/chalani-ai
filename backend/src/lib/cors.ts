@@ -1,6 +1,6 @@
 import type { CorsOptions } from 'cors';
 import logger from '@/lib/logger';
-import config from '@/config';
+import config from '@/config/envValidation';
 
 const corsOptions: CorsOptions = {
   origin(origin, callback) {
