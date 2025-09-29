@@ -4,9 +4,9 @@ export class APIError extends Error {
   public errors: Array<{ field?: string; message: string }>;
 
   constructor(
-    status = "error",
+    status = 'error',
     statusCode = 500,
-    message = "Something went wrong",
+    message = 'Something went wrong',
     errors: Array<{ field?: string; message: string }> = [],
     stack?: string
   ) {

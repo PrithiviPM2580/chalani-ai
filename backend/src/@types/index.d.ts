@@ -5,14 +5,14 @@ type ApiErrorItem = {
 
 type ApiErrorResponse = {
   success: false;
-  status: "error" | "fail";
+  status: 'error' | 'fail';
   message: string;
   errors: ApiErrorItem[];
 };
 
 type SuccessResponse<T> = {
   success: true;
-  status: "success";
+  status: 'success';
   message: string;
   data: T;
 };

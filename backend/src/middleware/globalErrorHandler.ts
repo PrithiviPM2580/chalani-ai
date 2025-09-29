@@ -1,16 +1,16 @@
-import type { Request, Response, NextFunction } from "express";
-import { APIError } from "@/utils/apiError";
-import logger from "@/lib/logger";
+import type { Request, Response, NextFunction } from 'express';
+import { APIError } from '@/utils/apiError';
+import logger from '@/lib/logger';
 
 export const globalErrorHandler = (
   err: unknown,
   _req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
   void next;
   if (err instanceof APIError) {
-    logger.error("API Error: ", {
+    logger.error('API Error: ', {
       message: err.message,
       statusCode: err.statusCode,
       errors: err.errors,
@@ -25,15 +25,15 @@ export const globalErrorHandler = (
     });
   }
 
-  logger.error("Unexpected Error: ", {
+  logger.error('Unexpected Error: ', {
     message: (err as Error).message,
     stack: (err as Error).stack,
   });
 
   return res.status(500).json({
     success: false,
-    status: "error",
-    message: "Internal Server Error",
+    status: 'error',
+    message: 'Internal Server Error',
     errors: [],
   });
 };
