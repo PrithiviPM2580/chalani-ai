@@ -26,3 +26,61 @@ export const envValidationSchema = z.object({
 });
 
 export type EnvConfig = z.infer<typeof envValidationSchema>;
+
+export const signUpValidationSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3, 'Username must be at least 3 characters')
+      .max(50, 'Username must be less than 50 characters')
+      .optional()
+      .transform(val => val?.trim()),
+    email: z
+      .email('Invalid email address')
+      .min(5, 'Email must be at least 5 characters')
+      .max(100, 'Email must be less than 100 characters')
+      .transform(val => val.trim().toLowerCase()),
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters')
+      .optional()
+      .transform(val => val?.trim()),
+    googleId: z.string().min(1).optional(),
+    businessName: z
+      .string()
+      .max(100, 'Business name must be less than 100 characters')
+      .optional()
+      .transform(s => s?.trim()),
+
+    address: z
+      .string()
+      .max(200, 'Address must be less than 200 characters')
+      .optional()
+      .transform(s => s?.trim()),
+
+    phoneNumber: z
+      .string()
+      .max(15, 'Phone number must be less than 15 characters')
+      .optional()
+      .transform(s => s?.trim()),
+
+    role: z
+      .enum(['user', 'admin'])
+      .optional()
+      .default('user')
+      .transform(r => (r === 'admin' ? 'user' : r)),
+  })
+  .superRefine((val, ctx) => {
+    if (!val.password && !val.googleId) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Either password or googleId is required for signup',
+        path: ['password'],
+      });
+      ctx.addIssue({
+        code: 'custom',
+        message: 'Either password or googleId is required for signup',
+        path: ['googleId'],
+      });
+    }
+  });
