@@ -84,3 +84,5 @@ export const signUpValidationSchema = z
       });
     }
   });
+
+export type SignUpInput = z.infer<typeof signUpValidationSchema>;

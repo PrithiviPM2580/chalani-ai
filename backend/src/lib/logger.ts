@@ -1,9 +1,7 @@
 import winston from 'winston';
 import config from '@/config/envValidation';
 
-const { combine, timestamp, errors, json, printf, colorize } = winston.format;
-
-console.log(config.NODE_ENV);
+const { combine, timestamp, errors, printf, colorize } = winston.format;
 
 const transports: winston.transport[] = [];
 
@@ -19,11 +17,11 @@ if (config.NODE_ENV === 'production') {
       format: combine(
         colorize({ all: true }),
         timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        printf(({ timestamp, level, message, ...meta }) => {
+        printf(({ timestamp, level, message, service, ...meta }) => {
           const metaStr = Object.keys(meta).length
-            ? `${JSON.stringify(meta)}`
+            ? `\n[Meta: ${JSON.stringify(meta)}]`
             : '';
-          return `${timestamp} [${level}]: ${message} [${metaStr}]`;
+          return `${timestamp} [${level}]: ${message}\n[Meta: { service:"${service}" }]${metaStr}`;
         })
       ),
     })
@@ -32,7 +30,7 @@ if (config.NODE_ENV === 'production') {
 
 const logger = winston.createLogger({
   level: config.LOG_LEVEL || 'info',
-  format: combine(timestamp(), errors({ stack: true }), json()),
+  format: combine(timestamp(), errors({ stack: true })), // keep JSON/file logs clean
   defaultMeta: { service: 'chalani-ai' },
   transports,
   silent: config.NODE_ENV === 'test',

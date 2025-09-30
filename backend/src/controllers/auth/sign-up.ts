@@ -1,7 +1,12 @@
 import type { Request, Response } from 'express';
 
-const signUpContoller = async (_req: Request, res: Response): Promise<void> => {
-  res.send('sign up controller');
+const signUpController = async (
+  _req: Request,
+  res: Response
+): Promise<void> => {
+  res
+    .status(201)
+    .json({ message: 'User registered successfully', user: _req.body });
 };
 
-export default signUpContoller;
+export default signUpController;

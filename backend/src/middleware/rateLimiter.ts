@@ -1,33 +1,61 @@
-import { RateLimiterMemory, IRateLimiterOptions } from 'rate-limiter-flexible';
-import type { Request, Response, NextFunction } from 'express';
 import logger from '@/lib/logger';
 import { APIError } from '@/utils/apiError';
+import type { Request, Response, NextFunction } from 'express';
+import {
+  RateLimiterMemory,
+  IRateLimiterOptions,
+  RateLimiterRes,
+} from 'rate-limiter-flexible';
 
-// Step 1: configure limiter options
-const globalOptions: IRateLimiterOptions = {
-  points: 100, // max 100 requests
-  duration: 60, // per 60 seconds
-  blockDuration: 300, // block for 300s if limit exceeded
+const globalOptions: IRateLimiterOptions = { points: 200, duration: 60 };
+const apiOptions: IRateLimiterOptions = { points: 100, duration: 60 };
+const authOptions: IRateLimiterOptions = { points: 5, duration: 60 };
+const adminOptions: IRateLimiterOptions = { points: 500, duration: 60 };
+
+export const limiters = {
+  global: new RateLimiterMemory(globalOptions),
+  api: new RateLimiterMemory(apiOptions),
+  auth: new RateLimiterMemory(authOptions),
+  admin: new RateLimiterMemory(adminOptions),
 };
 
-// Step 2: create limiter
-const globalLimiter = new RateLimiterMemory(globalOptions);
+export function rateLimiter(
+  limiter: RateLimiterMemory,
+  keyFn: (req: Request) => string
+) {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const rateRes: RateLimiterRes = await limiter.consume(keyFn(req));
 
-// Step 3: create middleware function
-export const globalLimiterMiddleware = async (
-  req: Request,
-  _res: Response,
-  next: NextFunction
-) => {
-  try {
-    await globalLimiter.consume(req.ip as string); // consume 1 point per request
-    next(); // allow request to continue
-  } catch {
-    logger.warn(`Rate limit exceeded for IP: ${req.ip}`);
-    throw new APIError(429, 'Too Many Requests', [
-      {
-        message: 'You have exceeded the request limit. Please try again later.',
-      },
-    ]);
-  }
-};
+      res.setHeader('X-RateLimit-Limit', limiter.points.toString());
+      res.setHeader(
+        'X-RateLimit-Remaining',
+        rateRes.remainingPoints.toString()
+      );
+      res.setHeader(
+        'X-RateLimit-Reset',
+        new Date(Date.now() + rateRes.msBeforeNext).toISOString()
+      );
+
+      next();
+    } catch (err: unknown) {
+      if (err instanceof RateLimiterRes) {
+        // now TypeScript knows it's RateLimiterRes
+        res.setHeader(
+          'Retry-After',
+          Math.ceil(err.msBeforeNext / 1000).toString()
+        );
+        res.setHeader('X-RateLimit-Limit', limiter.points.toString());
+        res.setHeader('X-RateLimit-Remaining', '0');
+        res.setHeader(
+          'X-RateLimit-Reset',
+          new Date(Date.now() + err.msBeforeNext).toISOString()
+        );
+
+        throw new APIError(429, 'Too many requests. Please try again later.');
+      }
+      logger.error('Rate Limiter Error: ', err);
+      next(err);
+    }
+  };
+}
