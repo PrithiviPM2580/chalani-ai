@@ -1,0 +1,29 @@
+import express from 'express';
+import request from 'supertest';
+import router from '@/routes';
+import type { Express } from 'express';
+
+let app: Express;
+
+beforeAll(() => {
+  app = express();
+  app.use(express.json());
+  app.use(router);
+});
+
+describe('Health Check', () => {
+  it('Get/ should return API status', async () => {
+    const res = await request(app).get('/');
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        message: 'API is running',
+        status: 'success',
+        version: '1.0.0',
+        docs: '/docs',
+      })
+    );
+    expect(res.body.timestamp).toBeDefined();
+  });
+});

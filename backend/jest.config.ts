@@ -4,18 +4,18 @@ const configJest: Config.InitialOptions = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   testMatch: [
-    '**/tests/unit/**/*.test.(ts|js)',
-    '**/tests/integration/**/*.test.(ts|js)',
+    '**/test/unit/**/*.test.(ts|js)',
+    '**/test/integration/**/*.test.(ts|js)',
   ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   clearMocks: true,
-  collectCoverage: true,
+  collectCoverage: process.env.CI === 'true',
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
-  setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   verbose: true,
 };
 

@@ -13,9 +13,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
-    "test:unit": "jest --testMatch '**/test/unit/**/*.test.(ts|js)'",
-    "test:integration": "jest --testMatch '**/test/integration/**/*.test.(ts|js)'",
-    "test:ci": "jest --ci --coverage"
+    "test:unit": "jest --testMatch \"**/test/unit/**/*.test.(ts|js)\"",
+    "test:integration": "jest --testMatch \"**/test/integration/**/*.test.(ts|js)\"",
+    "test:ci": "cross-env CI=true jest --ci --coverage"
   },
   "repository": {
     "type": "git",
@@ -49,11 +49,14 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.5.2",
+    "@types/supertest": "^6.0.3",
+    "cross-env": "^10.1.0",
     "eslint": "^9.36.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.4.0",
     "jest": "^30.2.0",
+    "mongodb-memory-server": "^10.2.1",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4",
     "ts-jest": "^29.4.4",
