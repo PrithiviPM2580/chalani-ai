@@ -10,7 +10,7 @@ export const successResponse = <T>(
 ): Response<SuccessResponse<T>> => {
   logger.info('Success Response: ', { message, data });
   return res.status(200).json({
-    success: true,
+    ok: true,
     status: 'success',
     message,
     data,

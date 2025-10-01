@@ -13,8 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "jest",
-    "test:unit": "jest --testMatch \"**/test/unit/**/*.test.(ts|js)\"",
-    "test:integration": "jest --testMatch \"**/test/integration/**/*.test.(ts|js)\"",
+    "test:unit": "jest --testMatch \"**/test/unit/**/*.test.(ts|js)\" --runInBand",
+    "test:integration": "jest --testMatch \"**/test/integration/**/*.test.(ts|js)\" --runInBand",
     "test:ci": "cross-env CI=true jest --ci --coverage"
   },
   "repository": {

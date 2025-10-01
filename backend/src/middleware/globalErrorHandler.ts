@@ -10,6 +10,8 @@ export const globalErrorHandler = (
   next: NextFunction
 ) => {
   void next;
+  logger.error('GlobalErrorHandler triggered', { err });
+
   if (err instanceof APIError) {
     logger.error(
       `API Error:
@@ -19,7 +21,7 @@ export const globalErrorHandler = (
     );
 
     return res.status(err.statusCode).json({
-      success: false,
+      ok: false,
       status: err.status,
       message: err.message,
       errors: err.errors,
@@ -32,7 +34,7 @@ export const globalErrorHandler = (
   });
 
   return res.status(500).json({
-    success: false,
+    ok: false,
     status: 'error',
     message: 'Internal Server Error',
     errors: [],
