@@ -1,17 +1,5 @@
 import { Document, Types } from 'mongoose';
 
-export type ApiErrorItem = {
-  field?: string;
-  message: string;
-};
-
-export type ApiErrorResponse = {
-  success: false;
-  status: 'error' | 'fail';
-  message: string;
-  errors: ApiErrorItem[];
-};
-
 export type SuccessResponse<T> = {
   success: true;
   status: 'success';

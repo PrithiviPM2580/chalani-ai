@@ -15,11 +15,12 @@
     "noUnusedParameters": true,
     "incremental": true,
     "resolveJsonModule": true,
+    "noEmit": true,
     "paths": {
       "@/*": ["src/*"]
     },
     "typeRoots": ["./src/@types"]
   },
-  "include": ["index.ts", "src/**/*"],
+  "include": ["index.ts", "src/**/*", "test/**/*"],
   "exclude": ["node_modules", "dist"]
 }

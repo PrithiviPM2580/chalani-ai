@@ -6,9 +6,12 @@ export interface IUser extends Document {
   email: string;
   password?: string;
   googleId?: string;
+  displayName?: string;
   businessName?: string;
   address?: string;
   phoneNumber?: string;
+  refreshToken?: string;
+  passwordResetToken?: string;
   role: 'user' | 'admin';
 
   matchPassword(enteredPassword: string): Promise<boolean>;
@@ -42,11 +45,15 @@ const userSchema = new Schema<IUser>(
       unique: true,
       sparse: true,
     },
+    displayName: {
+      type: String,
+      maxLength: [100, 'Display name must be less than 100 characters'],
+      trim: true,
+    },
     businessName: {
       type: String,
       maxLength: [100, 'Business name must be less than 100 characters'],
       trim: true,
-      default: '',
     },
     address: {
       type: String,
@@ -57,6 +64,16 @@ const userSchema = new Schema<IUser>(
       type: String,
       maxLength: [15, 'Phone number must be less than 15 characters'],
       trim: true,
+    },
+    refreshToken: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    passwordResetToken: {
+      type: String,
+      default: null,
+      select: false,
     },
     role: {
       type: String,
