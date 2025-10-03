@@ -14,7 +14,7 @@ export interface IUser {
   passwordResetToken?: string;
   role: 'user' | 'admin';
 
-  matchPassword(enteredPassword: string): Promise<boolean>;
+  matchPassword(enteredPassword?: string): Promise<boolean>;
 }
 
 export type UserDocument = HydratedDocument<IUser>;
@@ -101,9 +101,9 @@ userSchema.pre<UserDocument>('save', async function (next) {
 
 // Compare entered password
 userSchema.methods.matchPassword = async function (
-  enteredPassword: string
+  enteredPassword?: string
 ): Promise<boolean> {
-  if (!this.password) return false;
+  if (!this.password || !enteredPassword) return false;
   return await bcrypt.compare(enteredPassword, this.password);
 };
 

@@ -1,4 +1,4 @@
-import User, { IUser } from '@/models/user';
+import User, { IUser, UserDocument } from '@/models/user';
 import { HydratedDocument, Types } from 'mongoose';
 
 export type CreateUser = Pick<
@@ -7,16 +7,41 @@ export type CreateUser = Pick<
 > & { _id?: Types.ObjectId };
 
 export const findUserByEmailOrUsername = async (
-  email: string,
-  username?: string
-): Promise<IUser | null> => {
+  identifier?: string
+): Promise<UserDocument | null> => {
   return await User.findOne({
-    $or: [{ email }, ...(username ? [{ username }] : [])],
-  }).lean<IUser>();
+    $or: [{ email: identifier }, { username: identifier }],
+  }).select('+password');
 };
 
 export const createUser = async (
   userData: CreateUser
 ): Promise<HydratedDocument<IUser>> => {
   return await User.create(userData);
+};
+
+export const isUserExist = async (email: string): Promise<boolean> => {
+  const exist = await User.exists({ email });
+  return exist !== null;
+};
+
+export const isEmailExist = async (email?: string): Promise<boolean> => {
+  const exist = await User.exists({ email });
+  return exist !== null;
+};
+
+export const isUserExistByEmailOrUsername = async (
+  email: string,
+  username?: string
+): Promise<boolean> => {
+  const exist = await User.exists({
+    $or: [{ email }, ...(username ? [{ username }] : [])],
+  });
+  return exist !== null;
+};
+
+export const findUserByEmail = async (
+  email: string
+): Promise<UserDocument | null> => {
+  return await User.findOne({ email }).select('+password').lean<UserDocument>();
 };

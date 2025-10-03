@@ -68,3 +68,20 @@ export const authValidationSchema = z
   });
 
 export type AuthValidation = z.infer<typeof authValidationSchema>;
+
+export const loginValidationSchema = z
+  .object({
+    email: z.string().email().optional(),
+    username: z.string().min(3).max(50).optional(),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+  })
+  .refine(data => data.email || data.username, {
+    message: 'Either email or username is required',
+    path: ['identifier'],
+  })
+  .transform(data => ({
+    identifier: data.email ?? data.username,
+    password: data.password,
+  }));
+
+export type LoginValidation = z.infer<typeof loginValidationSchema>;
