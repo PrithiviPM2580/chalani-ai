@@ -1,4 +1,4 @@
-import { createUser, findUserByEmailOrUsername } from '@/dao/user';
+import { createUser, isUserExistByEmailOrUsername } from '@/dao/user';
 import User from '@/models/user';
 
 afterEach(async () => {
@@ -26,9 +26,8 @@ describe('User DAO', () => {
       role: 'user',
     });
 
-    const found = await findUserByEmailOrUsername('findme@test.com');
-    expect(found).not.toBeNull();
-    expect(found?.email).toBe('findme@test.com');
+    const found = await isUserExistByEmailOrUsername('findme@test.com');
+    expect(found).toBe(true);
   });
 
   it('should find user by username', async () => {
@@ -39,16 +38,20 @@ describe('User DAO', () => {
       role: 'user',
     });
 
-    const found = await findUserByEmailOrUsername(
+    const found = await isUserExistByEmailOrUsername(
       'other@test.com',
       'uniqueuser'
     );
-    expect(found).not.toBeNull();
-    expect(found?.username).toBe('uniqueuser');
+    expect(found).toBe(true);
   });
 
   it('should return null if no user found', async () => {
-    const found = await findUserByEmailOrUsername('notfound@test.com');
-    expect(found).toBeNull();
+    const found = await isUserExistByEmailOrUsername('notfound@test.com');
+    expect(found).toBe(false);
+  });
+
+  it('should return null if no user found', async () => {
+    const found = await isUserExistByEmailOrUsername('notfound@test.com');
+    expect(found).toBe(false);
   });
 });
