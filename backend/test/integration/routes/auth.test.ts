@@ -53,7 +53,7 @@ describe('POST /api/v1/auth/sign-up - Sign-Up', () => {
     expect(res.status).toBe(409);
     expect(res.body.ok).toBe(false);
     expect(res.body.status).toBe('error');
-    expect(res.body.message).toBe('Email is already in use');
+    expect(res.body.message).toBe('Username or email already in use');
   });
 
   it('should reject duplicate username', async () => {
@@ -74,6 +74,6 @@ describe('POST /api/v1/auth/sign-up - Sign-Up', () => {
     expect(res.status).toBe(409);
     expect(res.body.ok).toBe(false);
     expect(res.body.status).toBe('error');
-    expect(res.body.message).toBe('Username is already in use');
+    expect(res.body.message).toBe('Username or email already in use');
   });
 });

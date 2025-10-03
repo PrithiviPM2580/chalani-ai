@@ -2,7 +2,6 @@ import { signUpService } from '@/services/auth';
 import { APIError } from '@/utils/apiError';
 import * as userDao from '@/dao/user';
 import config from '@/config/envValidation';
-import { UserDocument } from '@/models/user';
 import { AuthValidation } from '@/validation/auth';
 
 // Mock the external dependencies
@@ -21,10 +20,9 @@ describe('signUpService - Unit Tests', () => {
   });
 
   it('should throw an error if the email is already in use', async () => {
-    jest.spyOn(userDao, 'findUserByEmailOrUsername').mockResolvedValueOnce({
-      email: 'dup@test.com',
-      username: 'dupUser',
-    } as UserDocument);
+    jest
+      .spyOn(userDao, 'isUserExistByEmailOrUsername')
+      .mockResolvedValueOnce(true);
 
     const signUpData = {
       email: 'dup@test.com',
@@ -36,10 +34,9 @@ describe('signUpService - Unit Tests', () => {
   });
 
   it('should throw an error if the username is already in use', async () => {
-    jest.spyOn(userDao, 'findUserByEmailOrUsername').mockResolvedValueOnce({
-      email: 'different@test.com',
-      username: 'dupUser',
-    } as UserDocument);
+    jest
+      .spyOn(userDao, 'isUserExistByEmailOrUsername')
+      .mockResolvedValueOnce(true);
 
     const signUpData = {
       email: 'hero@test.com',
