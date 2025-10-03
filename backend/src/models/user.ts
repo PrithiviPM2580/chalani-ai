@@ -1,7 +1,7 @@
-import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, HydratedDocument } from 'mongoose';
 import bcrypt from 'bcrypt';
 
-export interface IUser extends Document {
+export interface IUser {
   username?: string;
   email: string;
   password?: string;
@@ -16,6 +16,10 @@ export interface IUser extends Document {
 
   matchPassword(enteredPassword: string): Promise<boolean>;
 }
+
+export type UserDocument = HydratedDocument<IUser>;
+
+export type UserObject = IUser;
 
 const userSchema = new Schema<IUser>(
   {
@@ -88,7 +92,7 @@ const userSchema = new Schema<IUser>(
 );
 
 // Hash password before saving
-userSchema.pre<IUser>('save', async function (next) {
+userSchema.pre<UserDocument>('save', async function (next) {
   if (!this.isModified('password') || !this.password) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
