@@ -39,3 +39,10 @@ export const findUserByEmail = async (
 ): Promise<UserDocument | null> => {
   return await User.findOne({ email }).select('+password').lean<UserDocument>();
 };
+
+export const clearRefreshToken = async (userId?: Types.ObjectId) => {
+  return await User.updateOne(
+    { _id: userId },
+    { $set: { refreshToken: null } }
+  );
+};

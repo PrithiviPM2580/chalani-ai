@@ -1,5 +1,13 @@
 import { Document, Types } from 'mongoose';
 
+declare global {
+  namespace Express {
+    interface Request {
+      userId?: Types.ObjectId;
+    }
+  }
+}
+
 export type SuccessResponse<T> = {
   success: true;
   status: 'success';

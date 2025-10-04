@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import config from '@/config/envValidation';
 import type { Types } from 'mongoose';
-// import type { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 
 export type TokenPayload = { userId: Types.ObjectId };
 export type ResetLinkPayload = { email: string };
@@ -17,4 +17,14 @@ export const generateRefreshToken = (payload: TokenPayload) => {
     expiresIn: '7d',
   });
   return token;
+};
+
+export const verifyAccessToken = (accessToken: string): string | JwtPayload => {
+  return jwt.verify(accessToken, config.JWT_ACCESS_SECRET);
+};
+
+export const verifyRefreshToken = (
+  refreshToken: string
+): string | JwtPayload => {
+  return jwt.verify(refreshToken, config.JWT_REFRESH_SECRET);
 };

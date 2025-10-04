@@ -8,13 +8,17 @@ jest.mock('@/lib/jwt', () => ({
   generateRefreshToken: jest.fn(),
 }));
 
-import { loginService, signUpService } from '@/services/auth';
+import { loginService, logoutService, signUpService } from '@/services/auth';
 import { APIError } from '@/utils/apiError';
 import * as userDao from '@/dao/user';
 import config from '@/config/envValidation';
 import { AuthValidation, LoginValidation } from '@/validation/auth';
 import { UserDocument } from '@/models/user';
-import * as jwt from '@/lib/jwt'; // 👈 import mocked jwt functions so we can override return values
+import * as jwt from '@/lib/jwt';
+import type { UpdateResult } from 'mongoose';
+import mongoose from 'mongoose';
+
+const mockUserId = new mongoose.Types.ObjectId();
 
 describe('signUpService - Unit Tests', () => {
   afterEach(() => {
@@ -146,5 +150,36 @@ describe('loginService - Unit Tests', () => {
     });
 
     expect(mockUser.save).toHaveBeenCalled();
+  });
+});
+
+describe('logoutService - Unit Tests', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should throw 400 if userId is not provided', async () => {
+    await expect(logoutService()).rejects.toThrow(APIError);
+  });
+
+  it('should throw 500 if DAO update is not acknowledged', async () => {
+    jest.spyOn(userDao, 'clearRefreshToken').mockResolvedValueOnce({
+      acknowledged: false,
+      modifiedCount: 0,
+      matchedCount: 0,
+    } as UpdateResult);
+
+    await expect(logoutService(mockUserId)).rejects.toThrow(APIError);
+  });
+
+  it('should return true on successful logout', async () => {
+    jest.spyOn(userDao, 'clearRefreshToken').mockResolvedValueOnce({
+      acknowledged: true,
+      modifiedCount: 1,
+      matchedCount: 1,
+    } as UpdateResult);
+
+    const result = await logoutService(mockUserId);
+    expect(result).toBe(true);
   });
 });

@@ -5,6 +5,8 @@ import { asyncHandler } from '@/middleware/asyncHandler';
 import { authValidationSchema, loginValidationSchema } from '@/validation/auth';
 import { validateRequest } from '@/middleware/validateRequest';
 import { limiters, rateLimiter } from '@/middleware/rateLimiter';
+import logoutController from '@/controllers/auth/logout';
+import authentication from '@/middleware/authentication';
 
 const router = Router();
 
@@ -18,6 +20,12 @@ router.route('/login').post(
   rateLimiter(limiters.auth, req => req.ip as string),
   validateRequest(loginValidationSchema),
   asyncHandler(loginController)
+);
+
+router.route('/logout').delete(
+  rateLimiter(limiters.auth, req => req.ip as string),
+  authentication,
+  asyncHandler(logoutController)
 );
 
 export default router;

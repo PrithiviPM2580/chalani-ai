@@ -4,6 +4,8 @@ import { generateAccessToken, generateRefreshToken } from '@/lib/jwt';
 import config from '@/config/envValidation';
 import * as userDao from '@/dao/user';
 import { AuthValidation } from '@/validation/auth';
+import logger from '@/lib/logger';
+import { Types } from 'mongoose';
 
 type LoginValidation = {
   identifier?: string;
@@ -23,6 +25,9 @@ export const signUpService = async (data: AuthValidation) => {
     username
   );
   if (isUsernameAndEmailExist) {
+    logger.warn(
+      `Attempt to register with existing username or email: ${username}, ${email}`
+    );
     throw new APIError(409, 'Username or email already in use');
   }
 
@@ -40,6 +45,8 @@ export const signUpService = async (data: AuthValidation) => {
 
   user.refreshToken = refreshToken;
   await user.save();
+
+  logger.info(`New user registered: ${username} (${email})`);
 
   return {
     user: {
@@ -59,11 +66,17 @@ export const loginService = async (data: LoginValidation) => {
 
   const user = await userDao.findUserByEmailOrUsername(identifier);
   if (!user) {
+    logger.warn(
+      `Failed login attempt for identifier: ${identifier} due to non-existent user`
+    );
     throw new APIError(401, 'Invalid email or password');
   }
 
   const isPasswordMatch = await user.matchPassword(password);
   if (!isPasswordMatch) {
+    logger.warn(
+      `Failed login attempt for identifier: ${identifier} due to incorrect password`
+    );
     throw new APIError(401, 'Invalid email or password');
   }
   const userId = user._id;
@@ -73,6 +86,8 @@ export const loginService = async (data: LoginValidation) => {
 
   user.refreshToken = refreshToken;
   await user.save();
+
+  logger.info(`User logged in: ${user.username} (${user.email})`);
 
   return {
     user: {
@@ -85,4 +100,20 @@ export const loginService = async (data: LoginValidation) => {
     accessToken,
     refreshToken,
   };
+};
+
+export const logoutService = async (
+  userId?: Types.ObjectId
+): Promise<boolean> => {
+  if (!userId) {
+    logger.error(`UserId is requird for logout`);
+    throw new APIError(400, 'UserId is requird for logout');
+  }
+
+  const result = await userDao.clearRefreshToken(userId);
+  if (!result.acknowledged) {
+    logger.error(`Failed to logout this user ${userId}`);
+    throw new APIError(500, 'Failed to logout the user');
+  }
+  return true;
 };
