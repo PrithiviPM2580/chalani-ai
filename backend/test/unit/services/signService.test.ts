@@ -1,18 +1,20 @@
-import { signUpService } from '@/services/auth';
-import { APIError } from '@/utils/apiError';
-import * as userDao from '@/dao/user';
-import config from '@/config/envValidation';
-import { AuthValidation } from '@/validation/auth';
-
-// Mock the external dependencies
+// Mock external dependencies first
 jest.mock('@/utils', () => ({
   generateMongooseId: jest.fn(() => 'mock-id'),
 }));
 
 jest.mock('@/lib/jwt', () => ({
-  generateAccessToken: jest.fn(() => 'mock-access-token'),
-  generateRefreshToken: jest.fn(() => 'mock-refresh-token'),
+  generateAccessToken: jest.fn(),
+  generateRefreshToken: jest.fn(),
 }));
+
+import { loginService, signUpService } from '@/services/auth';
+import { APIError } from '@/utils/apiError';
+import * as userDao from '@/dao/user';
+import config from '@/config/envValidation';
+import { AuthValidation, LoginValidation } from '@/validation/auth';
+import { UserDocument } from '@/models/user';
+import * as jwt from '@/lib/jwt'; // 👈 import mocked jwt functions so we can override return values
 
 describe('signUpService - Unit Tests', () => {
   afterEach(() => {
@@ -62,5 +64,87 @@ describe('signUpService - Unit Tests', () => {
     } as AuthValidation;
 
     await expect(signUpService(signUpData)).rejects.toThrow(APIError);
+  });
+});
+
+describe('loginService - Unit Tests', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should throw an error if user does not exist', async () => {
+    jest
+      .spyOn(userDao, 'findUserByEmailOrUsername')
+      .mockResolvedValueOnce(null);
+
+    await expect(
+      loginService({
+        identifier: 'test@test.com',
+        password: 'password123',
+      } as LoginValidation)
+    ).rejects.toThrow(APIError);
+  });
+
+  it('should throw an error if password does not match', async () => {
+    const mockUser: Partial<UserDocument> = {
+      _id: 'mock-id' as unknown as UserDocument['_id'],
+      email: 'test@test.com',
+      username: 'tester',
+      role: 'user',
+      passwordResetToken: undefined,
+      matchPassword: jest.fn().mockResolvedValueOnce(false),
+    };
+
+    jest
+      .spyOn(userDao, 'findUserByEmailOrUsername')
+      .mockResolvedValueOnce(mockUser as UserDocument);
+
+    await expect(
+      loginService({
+        identifier: 'test@test.com',
+        password: 'wrongpassword',
+      } as LoginValidation)
+    ).rejects.toThrow(APIError);
+  });
+
+  it('should return user + tokens on successful login', async () => {
+    const mockUser: Partial<UserDocument> = {
+      _id: 'mock-id' as unknown as UserDocument['_id'],
+      email: 'test@test.com',
+      username: 'tester',
+      role: 'user',
+      passwordResetToken: undefined,
+      matchPassword: jest.fn().mockResolvedValueOnce(true),
+      save: jest.fn().mockResolvedValueOnce(true),
+    };
+
+    jest
+      .spyOn(userDao, 'findUserByEmailOrUsername')
+      .mockResolvedValueOnce(mockUser as UserDocument);
+
+    // ✅ Force the jwt mocks to return values
+    (jwt.generateAccessToken as jest.Mock).mockReturnValue('mock-access-token');
+    (jwt.generateRefreshToken as jest.Mock).mockReturnValue(
+      'mock-refresh-token'
+    );
+
+    const result = await loginService({
+      identifier: 'test@test.com',
+      password: 'password123',
+    });
+
+    expect(result).toEqual({
+      user: {
+        _id: 'mock-id',
+        email: 'test@test.com',
+        username: 'tester',
+        role: 'user',
+        passwordResetToken: undefined,
+      },
+      accessToken: 'mock-access-token',
+      refreshToken: 'mock-refresh-token',
+    });
+
+    expect(mockUser.save).toHaveBeenCalled();
   });
 });

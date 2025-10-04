@@ -77,3 +77,58 @@ describe('POST /api/v1/auth/sign-up - Sign-Up', () => {
     expect(res.body.message).toBe('Username or email already in use');
   });
 });
+
+describe('POST /api/v1/auth/login - Login', () => {
+  beforeEach(async () => {
+    await request(app).post('/api/v1/auth/sign-up').send({
+      email: 'test@test.com',
+      username: 'tester',
+      password: 'password123',
+      role: 'user',
+    });
+  });
+
+  it('should login an existing user successfully with email', async () => {
+    const res = await request(app).post('/api/v1/auth/login').send({
+      email: 'test@test.com',
+      password: 'password123',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.status).toBe('success');
+    expect(res.body.message).toBe('User logged in successfully');
+    expect(res.body.data.user.email).toBe('test@test.com');
+    expect(res.body.data.user.username).toBe('tester');
+    expect(res.body.data).toHaveProperty('accessToken');
+    expect(res.headers['set-cookie']).toBeDefined(); // refreshToken cookie
+  });
+
+  it('should login an existing user successfully with username', async () => {
+    const res = await request(app).post('/api/v1/auth/login').send({
+      username: 'tester',
+      password: 'password123',
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.status).toBe('success');
+    expect(res.body.message).toBe('User logged in successfully');
+    expect(res.body.data.user.email).toBe('test@test.com');
+    expect(res.body.data.user.username).toBe('tester');
+    expect(res.body.data).toHaveProperty('accessToken');
+    expect(res.headers['set-cookie']).toBeDefined(); // refreshToken cookie
+  });
+
+  it('should reject login with invalid credentials', async () => {
+    const res = await request(app).post('/api/v1/auth/login').send({
+      email: 'wronguser@test.com',
+      password: 'wrongpassword',
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body.ok).toBe(false);
+    expect(res.body.status).toBe('error');
+    expect(res.body.message).toBe('Invalid email or password');
+  });
+});

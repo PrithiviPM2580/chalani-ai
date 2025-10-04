@@ -9,7 +9,7 @@ import {
 
 const globalOptions: IRateLimiterOptions = { points: 200, duration: 60 };
 const apiOptions: IRateLimiterOptions = { points: 100, duration: 60 };
-const authOptions: IRateLimiterOptions = { points: 5, duration: 60 };
+const authOptions: IRateLimiterOptions = { points: 50, duration: 60 };
 const adminOptions: IRateLimiterOptions = { points: 500, duration: 60 };
 
 export const limiters = {
