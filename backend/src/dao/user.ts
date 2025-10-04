@@ -6,23 +6,17 @@ export type CreateUser = Pick<
   'username' | 'email' | 'password' | 'role'
 > & { _id?: Types.ObjectId };
 
+export const createUser = async (
+  userData: CreateUser
+): Promise<HydratedDocument<IUser>> => {
+  return await User.create(userData);
+};
 export const findUserByEmailOrUsername = async (
   identifier?: string
 ): Promise<UserDocument | null> => {
   return await User.findOne({
     $or: [{ email: identifier }, { username: identifier }],
   }).select('+password');
-};
-
-export const createUser = async (
-  userData: CreateUser
-): Promise<HydratedDocument<IUser>> => {
-  return await User.create(userData);
-};
-
-export const isUserExist = async (email: string): Promise<boolean> => {
-  const exist = await User.exists({ email });
-  return exist !== null;
 };
 
 export const isEmailExist = async (email?: string): Promise<boolean> => {
