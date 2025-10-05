@@ -1,4 +1,3 @@
-// Mock external dependencies first
 jest.mock('@/utils', () => ({
   generateMongooseId: jest.fn(() => 'mock-id'),
 }));
