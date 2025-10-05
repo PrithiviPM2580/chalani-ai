@@ -8,7 +8,7 @@ export type ResetLinkPayload = { email: string };
 
 export const generateAccessToken = (payload: TokenPayload) => {
   const token = jwt.sign(payload, config.JWT_ACCESS_SECRET, {
-    expiresIn: '30m',
+    expiresIn: '1m',
   });
   return token;
 };

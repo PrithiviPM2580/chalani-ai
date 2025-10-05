@@ -7,6 +7,7 @@ import { validateRequest } from '@/middleware/validateRequest';
 import { limiters, rateLimiter } from '@/middleware/rateLimiter';
 import logoutController from '@/controllers/auth/logout';
 import authentication from '@/middleware/authentication';
+import refreshTokenContoller from '@/controllers/auth/refreshToken';
 
 const router = Router();
 
@@ -26,6 +27,11 @@ router.route('/logout').delete(
   rateLimiter(limiters.auth, req => req.ip as string),
   authentication,
   asyncHandler(logoutController)
+);
+
+router.route('/refresh-token').get(
+  rateLimiter(limiters.auth, req => req.ip as string),
+  asyncHandler(refreshTokenContoller)
 );
 
 export default router;

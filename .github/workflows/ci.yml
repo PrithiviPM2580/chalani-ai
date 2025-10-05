@@ -71,6 +71,10 @@ jobs:
         run: npm run type-check
         working-directory: ./backend
 
+      - name: Jest Test
+        run: npm run test:ci
+        working-directory: ./backend
+
       - name: Build Project
         run: npm run build
         working-directory: ./backend

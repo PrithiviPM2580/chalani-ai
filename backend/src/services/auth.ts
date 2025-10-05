@@ -1,6 +1,11 @@
 import { APIError } from '@/utils/apiError';
 import { generateMongooseId } from '@/utils';
-import { generateAccessToken, generateRefreshToken } from '@/lib/jwt';
+import {
+  generateAccessToken,
+  generateRefreshToken,
+  TokenPayload,
+  verifyRefreshToken,
+} from '@/lib/jwt';
 import config from '@/config/envValidation';
 import * as userDao from '@/dao/user';
 import { AuthValidation } from '@/validation/auth';
@@ -145,4 +150,18 @@ export const googleService = async ({
     role: 'user',
   });
   return newUser;
+};
+
+export const refreshAccessTokenService = async (refreshToken: string) => {
+  const { userId } = verifyRefreshToken(refreshToken) as TokenPayload;
+
+  const user = await userDao.findUserById(userId);
+  if (!user || user.refreshToken !== refreshToken) {
+    logger.warn(`Invalid refresh token for userId: ${userId}`);
+    throw new APIError(401, 'Invalid refresh token');
+  }
+
+  const accessToken = generateAccessToken({ userId });
+
+  return { accessToken, userId };
 };

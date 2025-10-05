@@ -74,3 +74,9 @@ export const setRefreshToken = async (
     { new: true }
   ).select('+refreshToken');
 };
+
+export const findUserById = async (
+  userId?: Types.ObjectId | string
+): Promise<UserDocument | null> => {
+  return await User.findById(userId);
+};

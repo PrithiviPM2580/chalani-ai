@@ -6,12 +6,14 @@ jest.mock('@/utils', () => ({
 jest.mock('@/lib/jwt', () => ({
   generateAccessToken: jest.fn(),
   generateRefreshToken: jest.fn(),
+  verifyRefreshToken: jest.fn(),
 }));
 
 import {
   googleService,
   loginService,
   logoutService,
+  refreshAccessTokenService,
   signUpService,
 } from '@/services/auth';
 import { APIError } from '@/utils/apiError';
@@ -19,9 +21,10 @@ import * as userDao from '@/dao/user';
 import config from '@/config/envValidation';
 import { AuthValidation, LoginValidation } from '@/validation/auth';
 import { UserDocument } from '@/models/user';
-import * as jwt from '@/lib/jwt';
+import * as jwtLib from '@/lib/jwt';
 import type { UpdateResult } from 'mongoose';
 import mongoose from 'mongoose';
+import { JwtPayload } from 'jsonwebtoken';
 
 const mockUserId = new mongoose.Types.ObjectId();
 
@@ -132,8 +135,10 @@ describe('loginService - Unit Tests', () => {
       .mockResolvedValueOnce(mockUser as UserDocument);
 
     // ✅ Force the jwt mocks to return values
-    (jwt.generateAccessToken as jest.Mock).mockReturnValue('mock-access-token');
-    (jwt.generateRefreshToken as jest.Mock).mockReturnValue(
+    (jwtLib.generateAccessToken as jest.Mock).mockReturnValue(
+      'mock-access-token'
+    );
+    (jwtLib.generateRefreshToken as jest.Mock).mockReturnValue(
       'mock-refresh-token'
     );
 
@@ -187,83 +192,136 @@ describe('logoutService - Unit Tests', () => {
     const result = await logoutService(mockUserId);
     expect(result).toBe(true);
   });
+});
 
-  describe('googleService - Unit Tests', () => {
-    afterEach(() => {
-      jest.resetAllMocks();
+describe('googleService - Unit Tests', () => {
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should return existing user if found by googleId', async () => {
+    const mockUser = {
+      googleId: 'google-id-123',
+      email: 'google@test.com',
+    } as Partial<UserDocument> as UserDocument;
+
+    jest.spyOn(userDao, 'findUserByGoogleId').mockResolvedValueOnce(mockUser);
+
+    const result = await googleService({
+      googleId: 'google-id-123',
+      email: 'google@test.com',
+      displayName: 'Google User',
     });
 
-    it('should return existing user if found by googleId', async () => {
-      const mockUser = {
-        googleId: 'google-id-123',
-        email: 'google@test.com',
-      } as Partial<UserDocument> as UserDocument;
+    expect(userDao.findUserByGoogleId).toHaveBeenCalledWith('google-id-123');
+    expect(result).toBe(mockUser);
+  });
 
-      jest.spyOn(userDao, 'findUserByGoogleId').mockResolvedValueOnce(mockUser);
+  it('should link googleId if user exists by email', async () => {
+    const mockUser = {
+      email: 'google@test.com',
+      googleId: undefined,
+      save: jest.fn().mockResolvedValue(true),
+    };
 
-      const result = await googleService({
-        googleId: 'google-id-123',
-        email: 'google@test.com',
-        displayName: 'Google User',
-      });
+    jest.spyOn(userDao, 'findUserByGoogleId').mockResolvedValueOnce(null);
+    jest
+      .spyOn(userDao, 'findOne')
+      .mockResolvedValueOnce(mockUser as Partial<UserDocument> as UserDocument);
 
-      expect(userDao.findUserByGoogleId).toHaveBeenCalledWith('google-id-123');
-      expect(result).toBe(mockUser);
+    const result = await googleService({
+      googleId: 'google-id-123',
+      email: 'google@test.com',
+      displayName: 'Google User',
     });
 
-    it('should link googleId if user exists by email', async () => {
-      const mockUser = {
-        email: 'google@test.com',
-        googleId: undefined,
-        save: jest.fn().mockResolvedValue(true),
-      };
+    expect(userDao.findOne).toHaveBeenCalledWith('google@test.com');
+    expect(mockUser.googleId).toBe('google-id-123');
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(result).toBe(mockUser);
+  });
 
-      jest.spyOn(userDao, 'findUserByGoogleId').mockResolvedValueOnce(null);
-      jest
-        .spyOn(userDao, 'findOne')
-        .mockResolvedValueOnce(
-          mockUser as Partial<UserDocument> as UserDocument
-        );
+  it('should create a new user if none exists', async () => {
+    const mockNewUser = {
+      googleId: 'google-id-123',
+      email: 'new@test.com',
+      displayName: 'New User',
+      role: 'user',
+    } as Partial<UserDocument> as UserDocument;
 
-      const result = await googleService({
-        googleId: 'google-id-123',
-        email: 'google@test.com',
-        displayName: 'Google User',
-      });
+    jest.spyOn(userDao, 'findUserByGoogleId').mockResolvedValueOnce(null);
+    jest.spyOn(userDao, 'findOne').mockResolvedValueOnce(null);
+    jest.spyOn(userDao, 'createGoogleUser').mockResolvedValueOnce(mockNewUser);
 
-      expect(userDao.findOne).toHaveBeenCalledWith('google@test.com');
-      expect(mockUser.googleId).toBe('google-id-123');
-      expect(mockUser.save).toHaveBeenCalled();
-      expect(result).toBe(mockUser);
+    const result = await googleService({
+      googleId: 'google-id-123',
+      email: 'new@test.com',
+      displayName: 'New User',
     });
 
-    it('should create a new user if none exists', async () => {
-      const mockNewUser = {
-        googleId: 'google-id-123',
-        email: 'new@test.com',
-        displayName: 'New User',
-        role: 'user',
-      } as Partial<UserDocument> as UserDocument;
-
-      jest.spyOn(userDao, 'findUserByGoogleId').mockResolvedValueOnce(null);
-      jest.spyOn(userDao, 'findOne').mockResolvedValueOnce(null);
-      jest
-        .spyOn(userDao, 'createGoogleUser')
-        .mockResolvedValueOnce(mockNewUser);
-
-      const result = await googleService({
-        googleId: 'google-id-123',
-        email: 'new@test.com',
-        displayName: 'New User',
-      });
-
-      expect(userDao.createGoogleUser).toHaveBeenCalledWith({
-        googleId: 'google-id-123',
-        email: 'new@test.com',
-        displayName: 'New User',
-        role: 'user',
-      });
-      expect(result).toBe(mockNewUser);
+    expect(userDao.createGoogleUser).toHaveBeenCalledWith({
+      googleId: 'google-id-123',
+      email: 'new@test.com',
+      displayName: 'New User',
+      role: 'user',
     });
+    expect(result).toBe(mockNewUser);
+  });
+});
+
+describe('Refresh Token - Unit Tests', () => {
+  const mockUserId = new mongoose.Types.ObjectId();
+  const mockRefreshToken = 'valid-refresh-token';
+  const mockAccessToken = 'new-access-token';
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should return a new access token when refresh token is valid', async () => {
+    (jwtLib.verifyRefreshToken as jest.Mock).mockReturnValueOnce({
+      userId: mockUserId,
+    } as JwtPayload);
+
+    jest.spyOn(userDao, 'findUserById').mockResolvedValueOnce({
+      _id: mockUserId,
+      refreshToken: mockRefreshToken,
+    } as Partial<UserDocument> as UserDocument);
+
+    (jwtLib.generateAccessToken as jest.Mock).mockReturnValueOnce(
+      mockAccessToken
+    );
+
+    const result = await refreshAccessTokenService(mockRefreshToken);
+    expect(result).toEqual({
+      accessToken: mockAccessToken,
+      userId: mockUserId,
+    });
+  });
+
+  it('should throw API Error if user not found', async () => {
+    (jwtLib.verifyRefreshToken as jest.Mock).mockReturnValueOnce({
+      userId: mockUserId,
+    } as JwtPayload);
+
+    jest.spyOn(userDao, 'findUserById').mockResolvedValueOnce(null);
+
+    await expect(refreshAccessTokenService(mockRefreshToken)).rejects.toThrow(
+      APIError
+    );
+  });
+
+  it('should throw API Error if refresh token does not match', async () => {
+    (jwtLib.verifyRefreshToken as jest.Mock).mockReturnValueOnce({
+      userId: mockUserId,
+    } as JwtPayload);
+
+    jest.spyOn(userDao, 'findUserById').mockResolvedValueOnce({
+      _id: mockUserId,
+      refreshToken: 'different-token',
+    } as Partial<UserDocument> as UserDocument);
+
+    await expect(refreshAccessTokenService(mockRefreshToken)).rejects.toThrow(
+      APIError
+    );
   });
 });

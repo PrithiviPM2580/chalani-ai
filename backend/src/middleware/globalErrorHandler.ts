@@ -1,7 +1,11 @@
 import type { Request, Response, NextFunction } from 'express';
 import { APIError } from '@/utils/apiError';
 import logger from '@/lib/logger';
-// import config from '@/config/envValidation';
+import {
+  JsonWebTokenError,
+  TokenExpiredError,
+  NotBeforeError,
+} from 'jsonwebtoken';
 
 export const globalErrorHandler = (
   err: unknown,
@@ -12,12 +16,22 @@ export const globalErrorHandler = (
   void next;
   logger.error('GlobalErrorHandler triggered', { err });
 
+  // ✅ Handle JWT errors first
+  if (err instanceof TokenExpiredError) {
+    err = new APIError(401, 'Refresh token expired. Please log in again.');
+  } else if (err instanceof JsonWebTokenError) {
+    err = new APIError(401, 'Invalid refresh token. Please log in again.');
+  } else if (err instanceof NotBeforeError) {
+    err = new APIError(401, 'Refresh token not active yet.');
+  }
+
+  // ✅ Handle your custom APIError
   if (err instanceof APIError) {
     logger.error(
       `API Error:
-   message: ${err.message}
-   statusCode: ${err.statusCode}
-   errors: ${JSON.stringify(err.errors, null, 2)}`
+       message: ${err.message}
+       statusCode: ${err.statusCode}
+       errors: ${JSON.stringify(err.errors, null, 2)}`
     );
 
     return res.status(err.statusCode).json({
@@ -28,6 +42,7 @@ export const globalErrorHandler = (
     });
   }
 
+  // ✅ Fallback for unexpected errors
   logger.error('Unexpected Error: ', {
     message: (err as Error).message,
     stack: (err as Error).stack,
