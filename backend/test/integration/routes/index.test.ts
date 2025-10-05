@@ -2,6 +2,7 @@ import express from 'express';
 import request from 'supertest';
 import router from '@/routes';
 import type { Express } from 'express';
+import { globalErrorHandler } from '@/middleware/globalErrorHandler';
 
 let app: Express;
 
@@ -9,6 +10,7 @@ beforeAll(() => {
   app = express();
   app.use(express.json());
   app.use(router);
+  app.use(globalErrorHandler);
 });
 
 describe('Health Check', () => {
