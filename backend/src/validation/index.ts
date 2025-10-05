@@ -39,6 +39,9 @@ export const envValidationSchema = z.object({
     .number()
     .min(0)
     .default(7 * 24 * 60 * 60 * 1000),
+  GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
+  GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required'),
+  GOOGLE_CALLBACK_URL: z.string().min(1, 'GOOGLE_CALLBACK_URL is required'),
 });
 
 export type EnvConfig = z.infer<typeof envValidationSchema>;

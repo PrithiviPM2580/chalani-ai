@@ -19,7 +19,7 @@ export interface IUser {
 
 export type UserDocument = HydratedDocument<IUser>;
 
-export type UserObject = IUser;
+export type UserObject = IUser & { _id: mongoose.Types.ObjectId };
 
 const userSchema = new Schema<IUser>(
   {

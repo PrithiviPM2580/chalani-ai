@@ -1,9 +1,12 @@
 import {
   clearRefreshToken,
+  createGoogleUser,
   createUser,
   findUserByEmailOrUsername,
+  findUserByGoogleId,
   isEmailExist,
   isUserExistByEmailOrUsername,
+  setRefreshToken,
 } from '@/dao/user';
 import User from '@/models/user';
 import mongoose from 'mongoose';
@@ -137,5 +140,60 @@ describe('User DAO', () => {
     expect(result.acknowledged).toBe(true);
     expect(result.modifiedCount).toBe(0);
     expect(result.matchedCount).toBe(0);
+  });
+
+  it('should create a user with the Google Data', async () => {
+    const googleUser = await createGoogleUser({
+      email: 'google@test.com',
+      googleId: 'google-id-123',
+      displayName: 'Google User',
+      role: 'user',
+    });
+
+    expect(googleUser).toBeDefined();
+    expect(googleUser.email).toBe('google@test.com');
+    expect(googleUser.googleId).toBe('google-id-123');
+    expect(googleUser.displayName).toBe('Google User');
+    expect(googleUser.role).toBe('user');
+  });
+
+  it('should find the user by the Google Id', async () => {
+    const googleUser = await createGoogleUser({
+      email: 'google@test.com',
+      googleId: 'google-id-123',
+      displayName: 'Google User',
+      role: 'user',
+    });
+
+    const foundUser = await findUserByGoogleId('google-id-123');
+    expect(foundUser).not.toBeNull();
+
+    if (!foundUser) return;
+
+    expect(foundUser.email).toBe(googleUser.email);
+    expect(foundUser.googleId).toBe(googleUser.googleId);
+    expect(foundUser.displayName).toBe(googleUser.displayName);
+    expect(foundUser.role).toBe(googleUser.role);
+  });
+
+  it('should set refresh token for a user', async () => {
+    const user = await User.create({
+      email: 'test@example.com',
+      googleId: 'google-123',
+      displayName: 'Test User',
+      role: 'user',
+      password: 'hashedPassword',
+    });
+
+    const token = 'some-refresh-token';
+
+    const updatedUser = await setRefreshToken(user._id, token);
+
+    expect(updatedUser).not.toBeNull();
+    expect(updatedUser?.refreshToken).toBe(token);
+
+    // double check in DB
+    const reloaded = await User.findById(user._id).select('+refreshToken');
+    expect(reloaded?.refreshToken).toBe(token);
   });
 });

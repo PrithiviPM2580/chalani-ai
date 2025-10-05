@@ -117,3 +117,32 @@ export const logoutService = async (
   }
   return true;
 };
+
+export const googleService = async ({
+  googleId,
+  email,
+  displayName,
+}: {
+  googleId?: string;
+  email?: string;
+  displayName?: string;
+}) => {
+  let user = await userDao.findUserByGoogleId(googleId);
+  if (user) return user;
+
+  if (email) {
+    user = await userDao.findOne(email);
+    if (user) {
+      user.googleId = googleId;
+      await user.save();
+      return user;
+    }
+  }
+  const newUser = await userDao.createGoogleUser({
+    googleId,
+    email,
+    displayName,
+    role: 'user',
+  });
+  return newUser;
+};

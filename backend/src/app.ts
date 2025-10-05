@@ -6,6 +6,7 @@ import route from '@/routes';
 import cors from 'cors';
 import corsOptions from '@/lib/cors';
 import { globalErrorHandler } from './middleware/globalErrorHandler';
+import passport from '@/lib/passport';
 
 const app: Express = express();
 
@@ -19,6 +20,8 @@ app.use(express.static(`${__dirname}/public`));
 app.use(cookieParser());
 
 app.use(route);
+
+app.use(passport.initialize());
 
 app.use(globalErrorHandler);
 export default app;

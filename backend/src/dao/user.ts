@@ -1,3 +1,4 @@
+import { GoogleData } from '@/@types';
 import User, { IUser, UserDocument } from '@/models/user';
 import { HydratedDocument, Types } from 'mongoose';
 
@@ -40,9 +41,36 @@ export const findUserByEmail = async (
   return await User.findOne({ email }).select('+password').lean<UserDocument>();
 };
 
+export const findOne = async (email: string): Promise<UserDocument | null> => {
+  return await User.findOne({ email });
+};
+
 export const clearRefreshToken = async (userId?: Types.ObjectId) => {
   return await User.updateOne(
     { _id: userId },
     { $set: { refreshToken: null } }
   );
+};
+
+export const createGoogleUser = async (
+  googleData: GoogleData
+): Promise<HydratedDocument<IUser>> => {
+  return await User.create(googleData);
+};
+
+export const findUserByGoogleId = async (
+  googleId?: string
+): Promise<UserDocument | null> => {
+  return await User.findOne({ googleId }).select('+password');
+};
+
+export const setRefreshToken = async (
+  userId: Types.ObjectId | string,
+  token: string
+): Promise<UserDocument | null> => {
+  return await User.findByIdAndUpdate(
+    userId,
+    { $set: { refreshToken: token } },
+    { new: true }
+  ).select('+refreshToken');
 };

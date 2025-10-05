@@ -49,6 +49,8 @@
     "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.5.2",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "@types/supertest": "^6.0.3",
     "cross-env": "^10.1.0",
     "eslint": "^9.36.0",
@@ -76,6 +78,8 @@
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "rate-limiter-flexible": "^8.0.1",
     "winston": "^3.17.0",
     "zod": "^4.1.11"

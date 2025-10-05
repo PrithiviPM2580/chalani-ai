@@ -1,9 +1,11 @@
+import { IUser, UserDocument } from '@/models/user';
 import { Document, Types } from 'mongoose';
 
 declare global {
   namespace Express {
     interface Request {
       userId?: Types.ObjectId;
+      user?: UserDocument;
     }
   }
 }
@@ -69,3 +71,11 @@ export interface IInvoice extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type GoogleData = Pick<
+  IUser,
+  'googleId',
+  'email',
+  'displayName',
+  'role'
+>;
