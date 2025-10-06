@@ -2,15 +2,23 @@ import { APIError } from '@/utils/apiError';
 import { generateMongooseId } from '@/utils';
 import {
   generateAccessToken,
+  generatePasswordResetToken,
   generateRefreshToken,
+  ResetLinkPayload,
   TokenPayload,
+  verifyPasswordResetToken,
   verifyRefreshToken,
 } from '@/lib/jwt';
 import config from '@/config/envValidation';
 import * as userDao from '@/dao/user';
-import { AuthValidation } from '@/validation/auth';
+import { AuthValidation, ForgotPasswordValidation } from '@/validation/auth';
 import logger from '@/lib/logger';
 import { Types } from 'mongoose';
+import { getTransporter } from '@/lib/nodemailer';
+import {
+  nodemailerTemplateForForgotPassword,
+  nodemailerTemplateForResetPassword,
+} from '@/utils/nodemailerTemplate';
 
 type LoginValidation = {
   identifier?: string;
@@ -164,4 +172,73 @@ export const refreshAccessTokenService = async (refreshToken: string) => {
   const accessToken = generateAccessToken({ userId });
 
   return { accessToken, userId };
+};
+
+export const forgotPasswordService = async ({
+  email,
+}: ForgotPasswordValidation) => {
+  const isUserExist = await userDao.isEmailExist(email);
+  if (!isUserExist) {
+    logger.warn(
+      `Failed password reset attempt for non-existent user: ${email}`
+    );
+    throw new APIError(404, 'User with this email does not exist');
+  }
+
+  const passwordResetToken = generatePasswordResetToken({ email });
+
+  const user = await userDao.findUsernameWithResetPassword(email);
+  if (!user) {
+    logger.error(`User not found after existence check: ${email}`);
+    throw new APIError(404, 'User with this email does not exist');
+  }
+
+  const transporter = getTransporter();
+  const mail = await transporter.sendMail(
+    nodemailerTemplateForForgotPassword(
+      email,
+      user.username,
+      passwordResetToken
+    )
+  );
+  if (!mail.messageId) {
+    logger.error(`Failed to send password reset email to: ${email}`);
+    throw new APIError(500, 'Failed to send password reset email');
+  }
+
+  logger.info(`Password reset email sent to: ${email}`);
+  user.passwordResetToken = passwordResetToken;
+  await user.save();
+  return email;
+};
+
+export const resetPasswordService = async (token: string, password: string) => {
+  // 1. Verify token
+  const { email } = verifyPasswordResetToken(token) as ResetLinkPayload;
+
+  if (!email) {
+    logger.error('Invalid token payload: email is missing');
+    throw new APIError(400, 'Invalid token payload: email is missing');
+  }
+
+  // 2. Find user
+  const user = await userDao.findUserByEmail(email);
+  if (!user) {
+    logger.error(`User not found with email: ${email}`);
+    throw new APIError(404, 'User not found');
+  }
+
+  // 3. Validate token exists
+  if (!user.passwordResetToken) {
+    logger.error(`Password reset token not set for user with email: ${email}`);
+    throw new APIError(400, 'Password reset token not set');
+  }
+
+  // 4. Update password
+  await userDao.updateUserPassword(user, password);
+
+  const transporter = getTransporter();
+  await transporter.sendMail(
+    nodemailerTemplateForResetPassword(email, user.username)
+  );
 };

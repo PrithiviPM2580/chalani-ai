@@ -21,6 +21,10 @@ const env = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
+  JWT_PASSWORD_RESET_SECRET: process.env.JWT_PASSWORD_RESET_SECRET,
+  GMAIL_REFRESH_TOKEN: process.env.GMAIL_REFRESH_TOKEN,
+  EMAIL_USER: process.env.EMAIL_USER,
+  CLIENT_URL: process.env.CLIENT_URL,
 };
 
 const config = validate(envValidationSchema, env);

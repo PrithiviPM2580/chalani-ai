@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import config from '@/config/envValidation';
 import type { Types } from 'mongoose';
 import { JwtPayload } from 'jsonwebtoken';
+import { ForgotPasswordValidation } from '@/validation/auth';
 
 export type TokenPayload = { userId: Types.ObjectId };
 export type ResetLinkPayload = { email: string };
@@ -19,6 +20,15 @@ export const generateRefreshToken = (payload: TokenPayload) => {
   return token;
 };
 
+export const generatePasswordResetToken = (
+  payload: ForgotPasswordValidation
+) => {
+  const token = jwt.sign(payload, config.JWT_PASSWORD_RESET_SECRET, {
+    expiresIn: '15m',
+  });
+  return token;
+};
+
 export const verifyAccessToken = (accessToken: string): string | JwtPayload => {
   return jwt.verify(accessToken, config.JWT_ACCESS_SECRET);
 };
@@ -27,4 +37,10 @@ export const verifyRefreshToken = (
   refreshToken: string
 ): string | JwtPayload => {
   return jwt.verify(refreshToken, config.JWT_REFRESH_SECRET);
+};
+
+export const verifyPasswordResetToken = (
+  resetToken: string
+): string | JwtPayload => {
+  return jwt.verify(resetToken, config.JWT_PASSWORD_RESET_SECRET);
 };

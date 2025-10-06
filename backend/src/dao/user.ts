@@ -35,7 +35,7 @@ export const isUserExistByEmailOrUsername = async (
   return exist !== null;
 };
 
-export const findUserByEmail = async (
+export const findUserByEmailLean = async (
   email: string
 ): Promise<UserDocument | null> => {
   return await User.findOne({ email }).select('+password').lean<UserDocument>();
@@ -79,4 +79,23 @@ export const findUserById = async (
   userId?: Types.ObjectId | string
 ): Promise<UserDocument | null> => {
   return await User.findById(userId);
+};
+
+export const findUsernameWithResetPassword = async (
+  email: string
+): Promise<UserDocument | null> => {
+  return await User.findOne({ email }).select('username passwordResetToken');
+};
+
+export const findUserByEmail = async (email: string) => {
+  return User.findOne({ email }).select('password passwordResetToken username');
+};
+
+export const updateUserPassword = async (
+  user: UserDocument,
+  newPassword: string
+) => {
+  user.password = newPassword;
+  user.passwordResetToken = undefined;
+  return user.save();
 };

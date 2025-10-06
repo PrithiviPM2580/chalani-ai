@@ -42,6 +42,12 @@ export const envValidationSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().min(1, 'GOOGLE_CLIENT_ID is required'),
   GOOGLE_CLIENT_SECRET: z.string().min(1, 'GOOGLE_CLIENT_SECRET is required'),
   GOOGLE_CALLBACK_URL: z.string().min(1, 'GOOGLE_CALLBACK_URL is required'),
+  JWT_PASSWORD_RESET_SECRET: z
+    .string()
+    .min(20, 'Password reset token secret is too short'),
+  GMAIL_REFRESH_TOKEN: z.string().min(1, 'GMAIL_REFRESH_TOKEN is required'),
+  EMAIL_USER: z.email('EMAIL_USER is invalid').min(1, 'EMAIL_USER is required'),
+  CLIENT_URL: z.string().min(1, 'CLIENT_URL is required'),
 });
 
 export type EnvConfig = z.infer<typeof envValidationSchema>;

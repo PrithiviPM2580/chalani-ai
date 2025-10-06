@@ -85,3 +85,27 @@ export const loginValidationSchema = z
   }));
 
 export type LoginValidation = z.infer<typeof loginValidationSchema>;
+
+export const forgotPasswordValidationSchema = z.object({
+  email: z.string('Email is required'),
+});
+
+export type ForgotPasswordValidation = z.infer<
+  typeof forgotPasswordValidationSchema
+>;
+
+export const resetPasswordValidation = {
+  body: z.object({
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+  }),
+  query: z.object({
+    token: z.string().nonempty('Token is required'),
+  }),
+};
+
+export type ResetPasswordValidationBody = z.infer<
+  typeof resetPasswordValidation.body
+>;
+export type ResetPasswordValidationQuery = z.infer<
+  typeof resetPasswordValidation.query
+>;
