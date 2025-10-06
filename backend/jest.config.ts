@@ -15,7 +15,7 @@ const configJest: Config.InitialOptions = {
   collectCoverage: process.env.CI === 'true',
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
-  setupFiles: ['<rootDir>/test/setupEnv.ts', 'dotenv/config'],
+  setupFiles: ['dotenv/config', '<rootDir>/test/setupEnv.ts'],
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
   verbose: true,
 };
